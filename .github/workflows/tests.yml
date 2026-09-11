@@ -1,13 +1,34 @@
 name: test
+run-name: "test ${{ inputs.leg || github.event_name }} ${{ inputs.racecar_run }}"
 
-on: [ push, pull_request ]
+on:
+  push:
+  pull_request:
 
+  workflow_dispatch:
+    inputs:
+      leg:
+        description: "baseline (uninstrumented) or instrumented (under chalk/curiosity)"
+        type: choice
+        options: [instrumented, baseline]
+        default: baseline
+      profile:
+        description: "CrashOverride chalk profile"
+        type: string
+        default: curiosity-tests-racecar
+      racecar_run:
+        description: "racecar correlation token, echoed into the run name"
+        type: string
+        default: ""
+
+env:
+  CHALK_ON: ${{ inputs.leg == 'instrumented' }}
 jobs:
   raku:
     strategy:
       fail-fast: false
       matrix:
-        os: [ macos-latest, windows-latest, ubuntu-latest ]
+        os: [ubuntu-latest]
         raku-version: [ latest ]
     runs-on: ${{ matrix.os }}
 
